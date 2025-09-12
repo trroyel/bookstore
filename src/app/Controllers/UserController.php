@@ -1,0 +1,266 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Services\UserService;
+
+
+class UserController extends BaseController
+{
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
+    /**
+     * Display list of all users
+     */
+    public function index($request = null)
+    {
+        $users = $this->userService->readAllUsers();
+
+        // Remove passwords from display
+        foreach ($users as &$user) {
+            unset($user['password']);
+        }
+
+        $this->render('users/list', ['users' => $users]);
+    }
+
+    /**
+     * Show details of a specific user
+     */
+    public function show($request = null, $id = null)
+    {
+        // Handle both old and new parameter order
+        if (is_object($request) && $id === null) {
+            $id = $request;
+            $request = null;
+        }
+        $user = $this->userService->read($id);
+
+        if (!$user) {
+            $this->setFlash('error', 'User not found');
+            $this->redirect('/users');
+            return;
+        }
+
+        // Remove password from display
+        unset($user['password']);
+
+        $this->render('users/show', ['user' => $user]);
+    }
+
+    /**
+     * Display form to create new user
+     */
+    public function create($request = null)
+    {
+        $this->render('users/create');
+    }
+
+    /**
+     * Process form submission and save new user
+     */
+    public function store($request = null)
+    {
+        if (!$this->isPost()) {
+            $this->redirect('/users/create');
+            return;
+        }
+
+        $data = $this->sanitize($this->getPostData());
+
+        // Check if this is an edit (has id in data)
+        $isEdit = isset($data['id']) && !empty($data['id']);
+
+        // Validate required fields - password only required for new users
+        $requiredFields = ['name', 'email'];
+        if (!$isEdit) {
+            $requiredFields[] = 'password';
+            $requiredFields[] = 'password_confirm';
+        }
+        $errors = $this->validateRequired($data, $requiredFields);
+
+        // Check password confirmation (only if password provided)
+        if (!empty($data['password']) && $data['password'] !== ($data['password_confirm'] ?? '')) {
+            $errors[] = 'Passwords do not match';
+        }
+
+        // Check password length (only if password provided)
+        if (!empty($data['password']) && strlen($data['password']) < 6) {
+            $errors[] = 'Password must be at least 6 characters long';
+        }
+
+        // Check if email already exists
+        if (empty($errors)) {
+            $existingUser = $this->userService->findByEmail($data['email']);
+            if ($existingUser && (!$isEdit || $existingUser['id'] != $data['id'])) {
+                $errors[] = 'Email already exists';
+            }
+        }
+
+        if (!empty($errors)) {
+            $this->render('users/create', ['errors' => $errors, 'data' => $data, 'isEdit' => $isEdit]);
+            return;
+        }
+
+        // Remove password_confirm from data
+        unset($data['password_confirm']);
+
+        // Remove empty password for updates
+        if ($isEdit && empty($data['password'])) {
+            unset($data['password']);
+        }
+
+        if ($isEdit) {
+            // Update existing user
+            $this->userService->update($data['id'], $data);
+            $this->setFlash('success', 'User updated successfully');
+            $this->redirect('/users');
+        } else {
+            // Create new user
+            $user = $this->userService->create($data);
+            $this->setFlash('success', 'User created successfully');
+            $this->redirect('/users');
+        }
+    }
+
+    /**
+     * Display form to edit existing user
+     */
+    public function edit($request = null, $id = null)
+    {
+        // Handle both old and new parameter order
+        if (is_object($request) && $id === null) {
+            $id = $request;
+            $request = null;
+        }
+
+        $user = $this->userService->read($id);
+
+        if (!$user) {
+            $this->setFlash('error', 'User not found');
+            $this->redirect('/users');
+            return;
+        }
+
+        // Remove password from form data
+        unset($user['password']);
+
+        $this->render('users/create', ['data' => $user, 'isEdit' => true]);
+    }
+
+    /**
+     * Process edit form and update user data
+     */
+    public function update($request = null, $id = null)
+    {
+        // Handle both old and new parameter order
+        if (is_object($request) && $id === null) {
+            $id = $request;
+            $request = null;
+        }
+        // Add ID to POST data and use store method which handles both create and update
+        $_POST['id'] = $id;
+        $this->store();
+    }
+
+    /**
+     * Remove user from system
+     */
+    public function delete($request = null, $id = null)
+    {
+        // Handle both old and new parameter order
+        if (is_object($request) && $id === null) {
+            $id = $request;
+            $request = null;
+        }
+
+        $user = $this->userService->read($id);
+        if (!$user) {
+            $this->setFlash('error', 'User not found');
+            $this->redirect('/users');
+            return;
+        }
+
+        $this->userService->delete($id);
+        $this->setFlash('success', 'User deleted successfully');
+        $this->redirect('/users');
+    }
+
+    /**
+     * Show login form
+     */
+    public function login($request = null)
+    {
+        // If user is already logged in, redirect to dashboard
+        if (isset($_SESSION['user'])) {
+            $this->redirect('/dashboard');
+            return;
+        }
+
+        $this->render('users/login');
+    }
+
+    /**
+     * Process login credentials
+     */
+    public function authenticate($request = null)
+    {
+        if (!$this->isPost()) {
+            $this->redirect('/login');
+            return;
+        }
+
+        $data = $this->sanitize($this->getPostData());
+
+        $errors = $this->validateRequired($data, ['email', 'password']);
+
+        if (!empty($errors)) {
+            $this->render('users/login', ['errors' => $errors]);
+            return;
+        }
+
+        $user = $this->userService->authenticate($data['email'], $data['password']);
+
+        if (!$user) {
+            $this->render('users/login', ['errors' => ['Invalid email or password']]);
+            return;
+        }
+
+        // Store user data in session
+        $_SESSION['user'] = $user;
+        $_SESSION['user_id'] = $user['id'];
+        
+        $this->setFlash('success', 'Welcome back!');
+        $this->redirect('/dashboard');
+    }
+
+    /**
+     * End user session
+     */
+    public function logout($request = null)
+    {
+        session_destroy();
+        $this->redirect('/');
+    }
+
+    /**
+     * Search users
+     */
+    public function search($request = null)
+    {
+        $query = isset($_GET['q']) ? $this->sanitize($_GET['q']) : '';
+
+        if (empty($query)) {
+            $this->redirect('/users');
+            return;
+        }
+
+        $users = $this->userService->search($query);
+        $this->render('users/list', ['users' => $users, 'searchQuery' => $query]);
+    }
+}

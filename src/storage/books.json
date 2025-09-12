@@ -1,0 +1,66 @@
+[
+    {
+        "id": "3",
+        "title": "Design Patterns",
+        "author": "Erich , Richard , Ralph , John",
+        "available": false,
+        "pages": 395,
+        "isbn": "9780201633610"
+    },
+    {
+        "id": "4",
+        "title": "Refactoring Code",
+        "author": "Martin Fowler",
+        "available": true,
+        "pages": 448,
+        "isbn": "9780201485677"
+    },
+    {
+        "id": 5,
+        "title": "You Don't Know JS",
+        "author": "Kyle Simpson",
+        "available": false,
+        "pages": 278,
+        "isbn": "9781491904244"
+    },
+    {
+        "id": "6",
+        "title": "Introduction to Algorithms",
+        "author": "Cormen,Leiserson, Ronald, Clifford Stein",
+        "available": true,
+        "pages": 1312,
+        "isbn": "9780262033848"
+    },
+    {
+        "id": 7,
+        "title": "Cracking the Coding Interview",
+        "author": "Gayle Laakmann McDowell",
+        "available": true,
+        "pages": 687,
+        "isbn": "9780984782857"
+    },
+    {
+        "id": 8,
+        "title": "Code Complete",
+        "author": "Steve McConnell",
+        "available": false,
+        "pages": 960,
+        "isbn": "9780735619678"
+    },
+    {
+        "id": 9,
+        "title": "The Art of Computer Programming",
+        "author": "Donald E. Knuth",
+        "available": true,
+        "pages": 3168,
+        "isbn": "9780201896830"
+    },
+    {
+        "id": "10",
+        "title": "Head First Design Pattern",
+        "author": "Eric Freeman, Bert Bates, Kathy Sierra, Elisabeth Robson",
+        "available": true,
+        "pages": 694,
+        "isbn": "9780596007126"
+    }
+]
