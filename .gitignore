@@ -1,1 +1,22 @@
+# Environment files
 .env
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Cache
+cache/
+tmp/
+
+# Docker volumes
+mysql_data/

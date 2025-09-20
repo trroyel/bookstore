@@ -1,4 +1,7 @@
 <?php
+
+namespace App\Models;
+
 // Book model: Handles book data and logic
 class Book
 {

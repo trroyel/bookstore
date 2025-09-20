@@ -7,8 +7,15 @@ services:
     container_name: php_app
     volumes:
       - ./src:/var/www/html
+    depends_on:
+      - mysql
     networks:
       - app-network
+    environment:
+      - DB_HOST=mysql
+      - DB_NAME=bookstore
+      - DB_USER=webengg
+      - DB_PASS=webengg
 
   web:
     image: nginx:alpine
@@ -22,6 +29,25 @@ services:
       - app
     networks:
       - app-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: webengg
+      MYSQL_DATABASE: bookstore
+      MYSQL_USER: webengg
+      MYSQL_PASSWORD: webengg
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
 
 networks:
   app-network:

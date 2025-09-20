@@ -1,18 +1,21 @@
 <?php
+
+namespace App\Models;
+
 class User
 {
     public $id;
     public $name;
-    public $address;
     public $email;
     public $password;
+    public $role;
 
-    public function __construct($id, $name,  $address, $email, $password)
+    public function __construct($id, $name, $email, $password, $role = 'user')
     {
         $this->id = $id;
         $this->name = $name;
-        $this->address = $address;
         $this->email = $email;
         $this->password = $password;
+        $this->role = $role;
     }
 }

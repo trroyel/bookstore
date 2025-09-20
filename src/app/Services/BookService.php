@@ -2,114 +2,50 @@
 namespace App\Services;
 
 class BookService {
-    private $file = __DIR__ . '/../../storage/books.json';
+    private $bookRepository;
 
-    /**
-     * Get all books
-     */
-    public function readAllBooks() {
-        if (!file_exists($this->file)) {
-            return [];
-        }
-        $json = file_get_contents($this->file);
-        $books = json_decode($json, true);
-        return is_array($books) ? $books : [];
+    public function __construct($bookRepository) {
+        $this->bookRepository = $bookRepository;
     }
 
-    /**
-     * Create a new book
-     */
+    public function readAllBooks() {
+        return $this->bookRepository->findAll();
+    }
+
     public function create($book) {
-        $books = $this->readAllBooks();
+        // Check if ISBN already exists
+        if (isset($book['isbn']) && $this->bookRepository->isbnExists($book['isbn'])) {
+            throw new \Exception('ISBN already exists');
+        }
         
-        // Generate new ID
-        $book['id'] = $this->generateId($books);
-        
-        // Add book to array
-        $books[] = $book;
-        
-        // Save to file
-        file_put_contents($this->file, json_encode($books, JSON_PRETTY_PRINT));
+        $id = $this->bookRepository->create($book);
+        $book['id'] = $id;
         return $book;
     }
 
-    /**
-     * Get a single book by ID
-     */
     public function read($id) {
-        $books = $this->readAllBooks();
-        foreach ($books as $book) {
-            if ($book['id'] == $id) {
-                return $book;
-            }
-        }
-        return null;
+        return $this->bookRepository->findById($id);
     }
 
-    /**
-     * Update an existing book
-     */
     public function update($id, $updatedBook) {
-        $books = $this->readAllBooks();
-        foreach ($books as &$book) {
-            if ($book['id'] == $id) {
-                $book = array_merge($book, $updatedBook);
-                $book['id'] = $id; // Ensure ID doesn't change
-                file_put_contents($this->file, json_encode($books, JSON_PRETTY_PRINT));
-                return $book;
-            }
+        // Check if ISBN already exists (excluding current book)
+        if (isset($updatedBook['isbn']) && $this->bookRepository->isbnExists($updatedBook['isbn'], $id)) {
+            throw new \Exception('ISBN already exists');
         }
-        return null;
+        
+        $rowCount = $this->bookRepository->update($id, $updatedBook);
+        return $rowCount > 0 ? $this->bookRepository->findById($id) : null;
     }
 
-    /**
-     * Delete a book by ID
-     */
     public function delete($id) {
-        $books = $this->readAllBooks();
-        foreach ($books as $key => $book) {
-            if ($book['id'] == $id) {
-                unset($books[$key]);
-                // Re-index array to maintain proper JSON structure
-                $books = array_values($books);
-                file_put_contents($this->file, json_encode($books, JSON_PRETTY_PRINT));
-                return true;
-            }
-        }
-        return false;
+        return $this->bookRepository->delete($id) > 0;
     }
 
-    /**
-     * Search books by title, author, or ISBN
-     */
     public function search($query) {
-        $books = $this->readAllBooks();
-        $results = [];
-        
-        foreach ($books as $book) {
-            if (
-                stripos($book['title'], $query) !== false ||
-                stripos($book['author'], $query) !== false ||
-                stripos($book['isbn'], $query) !== false
-            ) {
-                $results[] = $book;
-            }
-        }
-        
-        return $results;
+        return $this->bookRepository->search($query);
     }
 
-    /**
-     * Get books count
-     */
     public function getCount() {
         return count($this->readAllBooks());
-    }
-    
-    /**
-     * Generate new ID
-     */
-    private function generateId($items) {
-        return empty($items) ? 1 : max(array_column($items, 'id')) + 1;
     }
 }

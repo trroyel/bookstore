@@ -61,9 +61,14 @@ class BookController extends BaseController {
         $data['available'] = isset($data['available']) ? (bool)$data['available'] : true;
 
         // Create book
-        $book = $this->bookService->create($data);
-        $this->setFlash('success', 'Book added successfully');
-        $this->redirect('/books');
+        try {
+            $book = $this->bookService->create($data);
+            $this->setFlash('success', 'Book added successfully');
+            $this->redirect('/books');
+        } catch (\Exception $e) {
+            $errors[] = $e->getMessage();
+            $this->render('books/create', ['errors' => $errors, 'data' => $data]);
+        }
     }
 
 
@@ -114,9 +119,14 @@ class BookController extends BaseController {
         $data['available'] = isset($data['available']) ? (bool)$data['available'] : true;
 
         // Update book
-        $this->bookService->update($id, $data);
-        $this->setFlash('success', 'Book updated successfully');
-        $this->redirect('/books');
+        try {
+            $this->bookService->update($id, $data);
+            $this->setFlash('success', 'Book updated successfully');
+            $this->redirect('/books');
+        } catch (\Exception $e) {
+            $errors[] = $e->getMessage();
+            $this->render('books/create', ['errors' => $errors, 'data' => $data, 'isEdit' => true]);
+        }
     }
 
 

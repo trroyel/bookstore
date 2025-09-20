@@ -3,9 +3,11 @@ namespace App\Controllers;
 
 class HomeController extends BaseController {
     private $bookService;
+    private $userService;
     
-    public function __construct($bookService) {
+    public function __construct($bookService, $userService) {
         $this->bookService = $bookService;
+        $this->userService = $userService;
     }
     
     /**
@@ -55,9 +57,7 @@ class HomeController extends BaseController {
             return;
         }
 
-        $userService = new \App\Services\UserService();
-        
-        if ($userService->findByEmail($data['email'])) {
+        if ($this->userService->findByEmail($data['email'])) {
             $this->render('home/signup', ['errors' => ['Email already exists'], 'data' => $data, 'csrf_token' => $this->generateCsrfToken()]);
             return;
         }
@@ -65,7 +65,7 @@ class HomeController extends BaseController {
         unset($data['password_confirm']);
         $data['role'] = 'user';
         
-        $user = $userService->create($data);
+        $user = $this->userService->create($data);
         $_SESSION['user'] = $user;
         $_SESSION['user_id'] = $user['id'];
         

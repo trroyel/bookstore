@@ -1,34 +1,60 @@
 <?php
+
 namespace App\Core;
 
-class Container {
+class Container
+{
     private $services = [];
-    
-    public function get($className) {
-        if (!isset($this->services[$className])) {
-            $this->services[$className] = new $className();
+
+    public function get($id)
+    {
+        if (!isset($this->services[$id])) {
+            $this->services[$id] = $this->create($id);
         }
-        return $this->services[$className];
+        return $this->services[$id];
     }
-    
-    public function resolve($controllerClass) {
-        $bookService = $this->get('\\App\\Services\\BookService');
-        $userService = $this->get('\\App\\Services\\UserService');
+
+    private function create($id)
+    {
+        if ($id === 'database') {
+            return Database::getInstance();
+        }
         
+        if ($id === 'bookRepository') {
+            return new \App\Repositories\BookRepository($this->get('database'));
+        }
+        
+        if ($id === 'userRepository') {
+            return new \App\Repositories\UserRepository($this->get('database'));
+        }
+        
+        if ($id === 'bookService') {
+            return new \App\Services\BookService($this->get('bookRepository'));
+        }
+        
+        if ($id === 'userService') {
+            return new \App\Services\UserService($this->get('userRepository'));
+        }
+        
+        return new $id();
+    }
+
+    public function resolve($controllerClass)
+    {
         if ($controllerClass === 'App\\Controllers\\BookController') {
-            return new $controllerClass($bookService);
+            return new $controllerClass($this->get('bookService'));
         }
         
         if ($controllerClass === 'App\\Controllers\\UserController') {
-            return new $controllerClass($userService);
+            return new $controllerClass($this->get('userService'));
         }
         
         if ($controllerClass === 'App\\Controllers\\DashboardController') {
-            return new $controllerClass($bookService, $userService);
+            return new $controllerClass($this->get('bookService'), $this->get('userService'));
         }
         
         if ($controllerClass === 'App\\Controllers\\HomeController') {
-            return new $controllerClass($bookService);
+            return new $controllerClass($this->get('bookService'), $this->get('userService'));
         }
         
         return new $controllerClass();
