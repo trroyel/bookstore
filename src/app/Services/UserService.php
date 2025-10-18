@@ -18,11 +18,6 @@ class UserService
 
     public function create($user)
     {
-        // Set default role if not provided
-        if (!isset($user['role']) || empty($user['role'])) {
-            $user['role'] = 'user';
-        }
-        
         // Hash password if provided
         if (isset($user['password'])) {
             $user['password'] = password_hash($user['password'], PASSWORD_DEFAULT);

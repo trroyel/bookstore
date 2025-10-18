@@ -72,7 +72,15 @@
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link active" href="/books">Books</a></li>
+                    <?php 
+                    $currentUser = $_SESSION['user'] ?? null;
+                    $container = new \App\Core\Container();
+                    $authService = $container->get('authService');
+                    $canViewUsers = $authService->can($currentUser, 'user:read');
+                    ?>
+                    <?php if ($canViewUsers): ?>
                     <li class="nav-item"><a class="nav-link" href="/users">Users</a></li>
+                    <?php endif; ?>
                     <?php if (isset($_SESSION['user'])): ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
@@ -98,12 +106,20 @@
                 </svg>
                 All Books
             </h2>
+            <?php 
+            $currentUser = $_SESSION['user'] ?? null;
+            $container = new \App\Core\Container();
+            $authService = $container->get('authService');
+            $canCreateBook = $authService->can($currentUser, 'book:create');
+            ?>
+            <?php if ($canCreateBook): ?>
             <a href="/books/create" class="btn btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16" style="margin-right: 4px;">
                     <path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z" />
                 </svg>
                 Add New Book
             </a>
+            <?php endif; ?>
         </div>
 
         <div class="row mb-3">
@@ -167,6 +183,10 @@
                                     <?php endif; ?>
                                 </td>
                                 <td>
+                                    <?php 
+                                    $canUpdateBook = $authService->can($currentUser, 'book:update');
+                                    $canDeleteBook = $authService->can($currentUser, 'book:delete');
+                                    ?>
                                     <div class="btn-group" role="group">
                                         <a href="/books/<?= htmlspecialchars($book['id']) ?>" class="btn btn-outline-primary btn-sm" title="View Book">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
@@ -174,11 +194,14 @@
                                                 <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z" />
                                             </svg>
                                         </a>
+                                        <?php if ($canUpdateBook): ?>
                                         <a href="/books/<?= htmlspecialchars($book['id']) ?>/edit" class="btn btn-outline-info btn-sm" title="Edit Book">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
                                                 <path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-4 1a.5.5 0 0 1-.62-.62l1-4a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 12.5 5.793 10.207 3.5l1-1zm1.586 3L10.5 3.207 3 10.707V13h2.293l7.5-7.5z" />
                                             </svg>
                                         </a>
+                                        <?php endif; ?>
+                                        <?php if ($canDeleteBook): ?>
                                         <form method="POST" action="/books/<?= htmlspecialchars($book['id']) ?>/delete" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this book?')">
                                             <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Book">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
@@ -187,6 +210,7 @@
                                                 </svg>
                                             </button>
                                         </form>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>
@@ -204,6 +228,7 @@
                     </p>
                 </div>
                 <div class="col-md-6 text-end">
+                    <?php if ($canCreateBook): ?>
                     <a href="/books/create" class="btn btn-outline-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16" style="margin-right: 4px;">
                             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
@@ -211,6 +236,7 @@
                         </svg>
                         Add Another Book
                     </a>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endif; ?>

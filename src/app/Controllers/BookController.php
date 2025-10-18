@@ -12,12 +12,16 @@ class BookController extends BaseController {
 
 
     public function index($request = null) {
+        $this->authorize('book:read');
+        
         $books = $this->bookService->readAllBooks();
         $this->render('books/list', ['books' => $books]);
     }
 
 
     public function show($request, $id) {
+        $this->authorize('book:read');
+        
         $book = $this->bookService->read($id);
         
         if (!$book) {
@@ -31,11 +35,15 @@ class BookController extends BaseController {
 
 
     public function create($request = null) {
+        $this->authorize('book:create');
+        
         $this->render('books/create');
     }
 
 
     public function store($request = null) {
+        $this->authorize('book:create');
+        
         if (!$this->isPost()) {
             $this->redirect('/books/create');
             return;
@@ -73,6 +81,7 @@ class BookController extends BaseController {
 
 
     public function edit($request, $id) {
+        $this->authorize('book:update');
         
         $book = $this->bookService->read($id);
         
@@ -87,6 +96,8 @@ class BookController extends BaseController {
 
 
     public function update($request, $id) {
+        $this->authorize('book:update');
+        
         if (!$this->isPost()) {
             $this->redirect('/books/' . $id . '/edit');
             return;
@@ -131,6 +142,7 @@ class BookController extends BaseController {
 
 
     public function delete($request, $id) {
+        $this->authorize('book:delete');
         
         $book = $this->bookService->read($id);
         if (!$book) {

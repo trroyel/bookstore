@@ -31,7 +31,13 @@ $router->group('auth', function ($router) {
     $router->get('/users/{id}/edit', 'UserController@edit');
     $router->post('/users/{id}/update', 'UserController@update');
     $router->post('/users/{id}/delete', 'UserController@delete');
+});
 
+// Public API routes
+$router->post('/api/token', 'ApiController@generateToken');
+
+// Protected API routes (require API token)
+$router->group('api', function ($router) {
     $router->get('/api/books', 'BookController@api');
     $router->get('/api/books/{id}', 'BookController@apiShow');
 });

@@ -44,3 +44,10 @@ $router->middleware('auth', function ($request) {
     }
     return true;
 });
+
+// API authentication middleware
+$router->middleware('api', function ($request) use ($router) {
+    $container = new \App\Core\Container();
+    $apiAuth = $container->resolve('App\\Middleware\\ApiAuthMiddleware');
+    return $apiAuth->handle($request);
+});

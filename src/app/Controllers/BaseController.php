@@ -154,4 +154,41 @@ abstract class BaseController {
     protected function validateCsrfToken($token) {
         return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
     }
+    
+    /**
+     * Get current user
+     */
+    protected function getCurrentUser() {
+        return $_SESSION['user'] ?? null;
+    }
+    
+    /**
+     * Check if user has permission
+     */
+    protected function authorize($permission) {
+        $container = new \App\Core\Container();
+        $authService = $container->get('authService');
+        $user = $this->getCurrentUser();
+        
+        if (!$authService->can($user, $permission)) {
+            $this->setFlash('error', 'You do not have permission to perform this action');
+            $this->redirect('/dashboard');
+            exit;
+        }
+    }
+    
+    /**
+     * Check if user is owner or has permission
+     */
+    protected function authorizeOwnerOr($resourceUserId, $permission) {
+        $container = new \App\Core\Container();
+        $authService = $container->get('authService');
+        $user = $this->getCurrentUser();
+        
+        if (!$authService->isOwner($user, $resourceUserId) && !$authService->can($user, $permission)) {
+            $this->setFlash('error', 'You do not have permission to perform this action');
+            $this->redirect('/dashboard');
+            exit;
+        }
+    }
 }

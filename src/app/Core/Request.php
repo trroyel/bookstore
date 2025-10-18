@@ -9,6 +9,7 @@ class Request {
     private $query;
     private $body;
     private $headers;
+    private $user;
 
     public function __construct() {
         $this->method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -254,5 +255,13 @@ class Request {
     public function input($key, $default = null) {
         $all = $this->all();
         return $all[$key] ?? $default;
+    }
+
+    public function setUser($user) {
+        $this->user = $user;
+    }
+
+    public function getUser() {
+        return $this->user;
     }
 }

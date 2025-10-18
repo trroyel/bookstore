@@ -4,10 +4,12 @@ namespace App\Controllers;
 class HomeController extends BaseController {
     private $bookService;
     private $userService;
+    private $roleRepository;
     
-    public function __construct($bookService, $userService) {
+    public function __construct($bookService, $userService, $roleRepository = null) {
         $this->bookService = $bookService;
         $this->userService = $userService;
+        $this->roleRepository = $roleRepository;
     }
     
     /**
@@ -63,7 +65,14 @@ class HomeController extends BaseController {
         }
 
         unset($data['password_confirm']);
-        $data['role'] = 'user';
+        
+        // Set default role_id to 'user'
+        if ($this->roleRepository) {
+            $userRole = $this->roleRepository->findByName('user');
+            if ($userRole) {
+                $data['role_id'] = $userRole['id'];
+            }
+        }
         
         $user = $this->userService->create($data);
         $_SESSION['user'] = $user;

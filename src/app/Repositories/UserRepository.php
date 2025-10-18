@@ -39,25 +39,25 @@ class UserRepository implements IUserRepository
 
     public function create(array $data)
     {
-        $sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO users (name, email, password, role_id) VALUES (?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             $data['name'],
             $data['email'],
             $data['password'],
-            $data['role'] ?? 'user'
+            $data['role_id'] ?? null
         ]);
         return $this->db->lastInsertId();
     }
 
     public function update($id, array $data)
     {
-        $sql = "UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?";
+        $sql = "UPDATE users SET name = ?, email = ?, role_id = ? WHERE id = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             $data['name'],
             $data['email'],
-            $data['role'] ?? 'user',
+            $data['role_id'] ?? null,
             $id
         ]);
         return $stmt->rowCount();

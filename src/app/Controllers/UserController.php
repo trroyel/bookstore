@@ -8,10 +8,12 @@ use App\Services\UserService;
 class UserController extends BaseController
 {
     protected $userService;
+    protected $roleRepository;
 
-    public function __construct(UserService $userService)
+    public function __construct(UserService $userService, $roleRepository = null)
     {
         $this->userService = $userService;
+        $this->roleRepository = $roleRepository;
     }
 
     /**
@@ -19,6 +21,8 @@ class UserController extends BaseController
      */
     public function index($request = null)
     {
+        $this->authorize('user:read');
+        
         $users = $this->userService->readAllUsers();
 
         // Remove passwords from display
@@ -39,6 +43,9 @@ class UserController extends BaseController
             $id = $request;
             $request = null;
         }
+        
+        $this->authorizeOwnerOr($id, 'user:read');
+        
         $user = $this->userService->read($id);
 
         if (!$user) {
@@ -58,7 +65,10 @@ class UserController extends BaseController
      */
     public function create($request = null)
     {
-        $this->render('users/create');
+        $this->authorize('user:create');
+        
+        $roles = $this->roleRepository ? $this->roleRepository->findAll() : [];
+        $this->render('users/create', ['roles' => $roles]);
     }
 
     /**
@@ -103,8 +113,17 @@ class UserController extends BaseController
         }
 
         if (!empty($errors)) {
-            $this->render('users/create', ['errors' => $errors, 'data' => $data, 'isEdit' => $isEdit]);
+            $roles = $this->roleRepository ? $this->roleRepository->findAll() : [];
+            $this->render('users/create', ['errors' => $errors, 'data' => $data, 'isEdit' => $isEdit, 'roles' => $roles]);
             return;
+        }
+        
+        // Set default role_id to 'user' if not provided
+        if (empty($data['role_id']) && $this->roleRepository) {
+            $userRole = $this->roleRepository->findByName('user');
+            if ($userRole) {
+                $data['role_id'] = $userRole['id'];
+            }
         }
 
         // Remove password_confirm from data
@@ -138,6 +157,8 @@ class UserController extends BaseController
             $id = $request;
             $request = null;
         }
+        
+        $this->authorizeOwnerOr($id, 'user:update');
 
         $user = $this->userService->read($id);
 
@@ -149,8 +170,9 @@ class UserController extends BaseController
 
         // Remove password from form data
         unset($user['password']);
-
-        $this->render('users/create', ['data' => $user, 'isEdit' => true]);
+        
+        $roles = $this->roleRepository ? $this->roleRepository->findAll() : [];
+        $this->render('users/create', ['data' => $user, 'isEdit' => true, 'roles' => $roles]);
     }
 
     /**
@@ -178,6 +200,8 @@ class UserController extends BaseController
             $id = $request;
             $request = null;
         }
+        
+        $this->authorizeOwnerOr($id, 'user:delete');
 
         $user = $this->userService->read($id);
         if (!$user) {
