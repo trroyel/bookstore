@@ -75,8 +75,14 @@ class HomeController extends BaseController {
         }
         
         $user = $this->userService->create($data);
-        $_SESSION['user'] = $user;
-        $_SESSION['user_id'] = $user['id'];
+        
+        // Re-fetch user with role and permissions
+        $authenticatedUser = $this->userService->authenticate($data['email'], $data['password']);
+        
+        $_SESSION['user'] = $authenticatedUser;
+        $_SESSION['user_id'] = $authenticatedUser['id'];
+        $_SESSION['role'] = $authenticatedUser['role_name'] ?? 'user';
+        $_SESSION['permissions'] = isset($authenticatedUser['permissions']) ? json_decode($authenticatedUser['permissions'], true) : [];
         
         $this->setFlash('success', 'Welcome to BookStore!');
         $this->redirect('/dashboard');

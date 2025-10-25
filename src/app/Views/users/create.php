@@ -54,6 +54,9 @@
                     <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="/books">Books</a></li>
                     <li class="nav-item"><a class="nav-link active" href="/users">Users</a></li>
+                    <?php if (hasPermission('role:read')): ?>
+                    <li class="nav-item"><a class="nav-link" href="/roles">Roles</a></li>
+                    <?php endif; ?>
                     <?php if (isset($_SESSION['user'])): ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
@@ -163,14 +166,7 @@
                 </div>
             </div>
 
-            <?php 
-            $currentUser = $_SESSION['user'] ?? null;
-            $container = new \App\Core\Container();
-            $authService = $container->get('authService');
-            $canAssignRole = $authService->can($currentUser, 'role:assign');
-            ?>
-            
-            <?php if ($canAssignRole): ?>
+            <?php if (hasPermission('role:assign')): ?>
             <div class="row">
                 <div class="col-12">
                     <div class="mb-3">

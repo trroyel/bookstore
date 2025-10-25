@@ -31,7 +31,10 @@ class UserRepository implements IUserRepository
 
     public function findByEmail($email)
     {
-        $sql = "SELECT * FROM users WHERE email = ?";
+        $sql = "SELECT users.*, roles.name as role_name, roles.permissions
+                FROM users
+                LEFT JOIN roles ON users.role_id = roles.id
+                WHERE users.email = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$email]);
         return $stmt->fetch(PDO::FETCH_ASSOC);

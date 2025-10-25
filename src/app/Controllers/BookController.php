@@ -186,4 +186,86 @@ class BookController extends BaseController {
         
         $this->json(['success' => true, 'data' => $book]);
     }
+
+    public function apiCreate($request) {
+        $data = json_decode($request->getBody(), true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+            $this->json(['success' => false, 'message' => 'Invalid JSON format'], 400);
+            return;
+        }
+        
+        if (empty($data['title']) || empty($data['author']) || empty($data['isbn']) || empty($data['pages'])) {
+            $this->json(['success' => false, 'message' => 'Missing required fields: title, author, isbn, pages'], 400);
+            return;
+        }
+        
+        if (!is_numeric($data['pages']) || $data['pages'] <= 0) {
+            $this->json(['success' => false, 'message' => 'Pages must be a positive number'], 400);
+            return;
+        }
+        
+        $data['pages'] = intval($data['pages']);
+        $data['available'] = isset($data['available']) ? (bool)$data['available'] : true;
+        
+        try {
+            $book = $this->bookService->create($data);
+            $this->json(['success' => true, 'data' => $book, 'message' => 'Book created successfully'], 201);
+        } catch (\Exception $e) {
+            $this->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiUpdate($request, $id) {
+        $book = $this->bookService->read($id);
+        
+        if (!$book) {
+            $this->json(['success' => false, 'message' => 'Book not found'], 404);
+            return;
+        }
+        
+        $data = json_decode($request->getBody(), true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+            $this->json(['success' => false, 'message' => 'Invalid JSON format'], 400);
+            return;
+        }
+        
+        if (empty($data['title']) || empty($data['author']) || empty($data['isbn']) || empty($data['pages'])) {
+            $this->json(['success' => false, 'message' => 'Missing required fields: title, author, isbn, pages'], 400);
+            return;
+        }
+        
+        if (!is_numeric($data['pages']) || $data['pages'] <= 0) {
+            $this->json(['success' => false, 'message' => 'Pages must be a positive number'], 400);
+            return;
+        }
+        
+        $data['pages'] = intval($data['pages']);
+        $data['available'] = isset($data['available']) ? (bool)$data['available'] : true;
+        
+        try {
+            $this->bookService->update($id, $data);
+            $updated = $this->bookService->read($id);
+            $this->json(['success' => true, 'data' => $updated, 'message' => 'Book updated successfully']);
+        } catch (\Exception $e) {
+            $this->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiDelete($request, $id) {
+        $book = $this->bookService->read($id);
+        
+        if (!$book) {
+            $this->json(['success' => false, 'message' => 'Book not found'], 404);
+            return;
+        }
+        
+        try {
+            $this->bookService->delete($id);
+            $this->json(['success' => true, 'message' => 'Book deleted successfully']);
+        } catch (\Exception $e) {
+            $this->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }

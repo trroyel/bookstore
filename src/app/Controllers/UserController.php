@@ -50,7 +50,7 @@ class UserController extends BaseController
 
         if (!$user) {
             $this->setFlash('error', 'User not found');
-            $this->redirect('/users');
+            $this->redirect(hasPermission('user:read') ? '/users' : '/dashboard');
             return;
         }
 
@@ -138,7 +138,12 @@ class UserController extends BaseController
             // Update existing user
             $this->userService->update($data['id'], $data);
             $this->setFlash('success', 'User updated successfully');
-            $this->redirect('/users');
+            // Redirect based on permissions
+            if (hasPermission('user:read')) {
+                $this->redirect('/users');
+            } else {
+                $this->redirect('/users/' . $data['id']);
+            }
         } else {
             // Create new user
             $user = $this->userService->create($data);
@@ -210,9 +215,20 @@ class UserController extends BaseController
             return;
         }
 
+        $currentUser = $this->getCurrentUser();
+        $isSelfDelete = $currentUser && $currentUser['id'] === $id;
+
         $this->userService->delete($id);
-        $this->setFlash('success', 'User deleted successfully');
-        $this->redirect('/users');
+        
+        if ($isSelfDelete) {
+            session_destroy();
+            session_start();
+            $this->setFlash('success', 'Your account has been deleted');
+            $this->redirect('/');
+        } else {
+            $this->setFlash('success', 'User deleted successfully');
+            $this->redirect('/users');
+        }
     }
 
     /**
@@ -258,6 +274,8 @@ class UserController extends BaseController
         // Store user data in session
         $_SESSION['user'] = $user;
         $_SESSION['user_id'] = $user['id'];
+        $_SESSION['role'] = $user['role_name'] ?? 'user';
+        $_SESSION['permissions'] = isset($user['permissions']) ? json_decode($user['permissions'], true) : [];
         
         $this->setFlash('success', 'Welcome back!');
         $this->redirect('/dashboard');

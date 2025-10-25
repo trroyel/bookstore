@@ -42,15 +42,13 @@
             </a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="/books">Books</a></li>
-                    <?php 
-                    $currentUser = $_SESSION['user'] ?? null;
-                    $container = new \App\Core\Container();
-                    $authService = $container->get('authService');
-                    $canViewUsers = $authService->can($currentUser, 'user:read');
-                    ?>
-                    <?php if ($canViewUsers): ?>
+                    <?php if (hasPermission('user:read')): ?>
                     <li class="nav-item"><a class="nav-link" href="/users">Users</a></li>
+                    <?php endif; ?>
+                    <?php if (hasPermission('role:read')): ?>
+                    <li class="nav-item"><a class="nav-link" href="/roles">Roles</a></li>
                     <?php endif; ?>
                     <?php if (isset($_SESSION['user'])): ?>
                         <li class="nav-item dropdown">
@@ -115,10 +113,7 @@
                         </div>
                     </div>
 
-                    <?php 
-                    $canUpdateBook = $authService->can($currentUser, 'book:update');
-                    ?>
-                    <?php if ($canUpdateBook): ?>
+                    <?php if (hasPermission('book:update')): ?>
                     <div class="mt-4">
                         <a href="/books/<?= htmlspecialchars($book['id']) ?>/edit" class="btn btn-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">

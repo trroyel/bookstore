@@ -34,6 +34,10 @@ CREATE TABLE IF NOT EXISTS users (
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
+select  users.id, users.name, users.role_id, roles.name as role_name, roles.permissions
+from users
+left join roles on users.role_id = roles.id;
+
 
 -- Insert sample books
 INSERT INTO books (id, title, author, isbn, pages, available) VALUES

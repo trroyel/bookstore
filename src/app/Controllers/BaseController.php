@@ -24,6 +24,10 @@ abstract class BaseController {
             throw new \Exception("View not found: " . $view);
         }
         
+        if (!file_exists($viewPath)) {
+            throw new \Exception("View file does not exist: " . $view);
+        }
+        
         include $viewPath;
     }
     
@@ -34,7 +38,13 @@ abstract class BaseController {
     protected function json($data, $statusCode = 200) {
         http_response_code($statusCode);
         header('Content-Type: application/json');
-        echo json_encode($data);
+        $json = json_encode($data);
+        if ($json === false) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'JSON encoding error']);
+        } else {
+            echo $json;
+        }
         exit;
     }
     
@@ -143,7 +153,11 @@ abstract class BaseController {
      */
     protected function generateCsrfToken() {
         if (!isset($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            try {
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            } catch (\Exception $e) {
+                $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(32));
+            }
         }
         return $_SESSION['csrf_token'];
     }
@@ -170,7 +184,7 @@ abstract class BaseController {
         $authService = $container->get('authService');
         $user = $this->getCurrentUser();
         
-        if (!$authService->can($user, $permission)) {
+        if (!$authService || !$authService->can($user, $permission)) {
             $this->setFlash('error', 'You do not have permission to perform this action');
             $this->redirect('/dashboard');
             exit;
@@ -185,7 +199,13 @@ abstract class BaseController {
         $authService = $container->get('authService');
         $user = $this->getCurrentUser();
         
-        if (!$authService->isOwner($user, $resourceUserId) && !$authService->can($user, $permission)) {
+        if (!$user) {
+            $this->setFlash('error', 'You must be logged in');
+            $this->redirect('/login');
+            exit;
+        }
+        
+        if (!$authService || (!$authService->isOwner($user, $resourceUserId) && !$authService->can($user, $permission))) {
             $this->setFlash('error', 'You do not have permission to perform this action');
             $this->redirect('/dashboard');
             exit;

@@ -31,6 +31,13 @@ $router->group('auth', function ($router) {
     $router->get('/users/{id}/edit', 'UserController@edit');
     $router->post('/users/{id}/update', 'UserController@update');
     $router->post('/users/{id}/delete', 'UserController@delete');
+
+    $router->get('/roles', 'RoleController@index');
+    $router->get('/roles/create', 'RoleController@create');
+    $router->post('/roles', 'RoleController@store');
+    $router->get('/roles/{id}/edit', 'RoleController@edit');
+    $router->post('/roles/{id}/update', 'RoleController@update');
+    $router->post('/roles/{id}/delete', 'RoleController@delete');
 });
 
 // Public API routes
@@ -40,6 +47,9 @@ $router->post('/api/token', 'ApiController@generateToken');
 $router->group('api', function ($router) {
     $router->get('/api/books', 'BookController@api');
     $router->get('/api/books/{id}', 'BookController@apiShow');
+    $router->post('/api/books', 'BookController@apiCreate');
+    $router->put('/api/books/{id}', 'BookController@apiUpdate');
+    $router->delete('/api/books/{id}', 'BookController@apiDelete');
 });
 
 // Dispatch request

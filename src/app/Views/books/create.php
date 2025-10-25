@@ -60,7 +60,12 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link active" href="/books">Books</a></li>
+                    <?php if (hasPermission('user:read')): ?>
                     <li class="nav-item"><a class="nav-link" href="/users">Users</a></li>
+                    <?php endif; ?>
+                    <?php if (hasPermission('role:read')): ?>
+                    <li class="nav-item"><a class="nav-link" href="/roles">Roles</a></li>
+                    <?php endif; ?>
                     <?php if (isset($_SESSION['user'])): ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">

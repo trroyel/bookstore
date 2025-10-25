@@ -73,6 +73,10 @@ class Container
             return new $controllerClass($this->get('userService'), $this->get('jwtService'));
         }
         
+        if ($controllerClass === 'App\\Controllers\\RoleController') {
+            return new $controllerClass($this->get('roleRepository'));
+        }
+        
         if ($controllerClass === 'App\\Middleware\\ApiAuthMiddleware') {
             return new $controllerClass($this->get('jwtService'), $this->get('userRepository'));
         }

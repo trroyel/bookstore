@@ -22,10 +22,14 @@ class ApiController extends BaseController
         
         if (is_string($data)) {
             $data = json_decode($data, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->json(['success' => false, 'message' => 'Invalid JSON format'], 400);
+                return;
+            }
         }
 
-        if (empty($data['email']) || empty($data['password'])) {
-            $this->json(['success' => false, 'message' => 'Email and password required', 'received' => $data], 400);
+        if (!is_array($data) || empty($data['email']) || empty($data['password'])) {
+            $this->json(['success' => false, 'message' => 'Email and password required'], 400);
             return;
         }
 

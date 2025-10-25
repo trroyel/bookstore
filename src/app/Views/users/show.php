@@ -48,14 +48,11 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="/books">Books</a></li>
-                    <?php 
-                    $currentUser = $_SESSION['user'] ?? null;
-                    $container = new \App\Core\Container();
-                    $authService = $container->get('authService');
-                    $canViewUsers = $authService->can($currentUser, 'user:read');
-                    ?>
-                    <?php if ($canViewUsers): ?>
+                    <?php if (hasPermission('user:read')): ?>
                     <li class="nav-item"><a class="nav-link active" href="/users">Users</a></li>
+                    <?php endif; ?>
+                    <?php if (hasPermission('role:read')): ?>
+                    <li class="nav-item"><a class="nav-link" href="/roles">Roles</a></li>
                     <?php endif; ?>
                     <?php if (isset($_SESSION['user'])): ?>
                         <li class="nav-item dropdown">
@@ -83,13 +80,7 @@
                 </svg>
                 User Details
             </h2>
-            <?php 
-            $currentUser = $_SESSION['user'] ?? null;
-            $container = new \App\Core\Container();
-            $authService = $container->get('authService');
-            $canViewUsers = $authService->can($currentUser, 'user:read');
-            ?>
-            <?php if ($canViewUsers): ?>
+            <?php if (hasPermission('user:read')): ?>
             <a href="/users" class="btn btn-secondary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16" style="margin-right: 4px;">
                     <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
@@ -105,6 +96,8 @@
             </a>
             <?php endif; ?>
         </div>
+
+        <?php include __DIR__ . '/../partials/flash-messages.php'; ?>
 
         <div class="card">
             <div class="card-body">
@@ -179,13 +172,7 @@
                 <hr>
 
                 <div class="d-flex justify-content-between">
-                    <?php 
-                    $currentUser = $_SESSION['user'] ?? null;
-                    $container = new \App\Core\Container();
-                    $authService = $container->get('authService');
-                    $canViewUsers = $authService->can($currentUser, 'user:read');
-                    ?>
-                    <?php if ($canViewUsers): ?>
+                    <?php if (in_array('user:read', $_SESSION['permissions'] ?? [])): ?>
                     <a href="/users" class="btn btn-outline-secondary">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16" style="margin-right: 4px;">
                             <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>

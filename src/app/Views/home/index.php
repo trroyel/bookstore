@@ -28,8 +28,24 @@
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">📚 BookStore</a>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/login">Login</a>
-                <a class="btn btn-primary px-3 ms-2" href="/signup">Sign Up</a>
+                <?php if (isset($_SESSION['user'])): ?>
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                    <a class="nav-link" href="/books">Books</a>
+                    <?php if (hasPermission('user:read')): ?>
+                    <a class="nav-link" href="/users">Users</a>
+                    <?php endif; ?>
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <?= htmlspecialchars($_SESSION['user']['name']) ?>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                        </ul>
+                    </div>
+                <?php else: ?>
+                    <a class="nav-link" href="/login">Login</a>
+                    <a class="btn btn-primary px-3 ms-2" href="/signup">Sign Up</a>
+                <?php endif; ?>
             </div>
         </div>
     </nav>
@@ -38,8 +54,13 @@
         <div class="container">
             <h1 class="display-4 fw-bold mb-4">Welcome to BookStore</h1>
             <p class="lead mb-4">Discover thousands of books and manage your reading journey</p>
-            <a href="/signup" class="btn btn-light btn-lg me-3">Get Started</a>
-            <a href="/login" class="btn btn-outline-light btn-lg">Login</a>
+            <?php if (isset($_SESSION['user'])): ?>
+                <a href="/dashboard" class="btn btn-light btn-lg me-3">Go to Dashboard</a>
+                <a href="/books" class="btn btn-outline-light btn-lg">Browse Books</a>
+            <?php else: ?>
+                <a href="/signup" class="btn btn-light btn-lg me-3">Get Started</a>
+                <a href="/login" class="btn btn-outline-light btn-lg">Login</a>
+            <?php endif; ?>
         </div>
     </section>
 

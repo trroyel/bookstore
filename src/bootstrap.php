@@ -29,6 +29,9 @@ spl_autoload_register(function ($class) {
     }
 });
 
+// Load helper functions
+require_once __DIR__ . '/app/helpers.php';
+
 use App\Core\Request;
 use App\Core\Router;
 
