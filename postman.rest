@@ -1,25 +1,6 @@
 @token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZGRlZGViOGEtYWJmNy0xMWYwLWFhNjctNzY4YzhiMzJiYzMzIiwiZW1haWwiOiJyb2hpbUBnbWFpbC5jb20iLCJyb2xlX2lkIjoiY2M0NGZhOTItYWJmNi0xMWYwLThjMGEtNzY4YzhiMzJiYzMzIiwiaWF0IjoxNzYwNzc3NzE3LCJleHAiOjE3NjA4NjQxMTd9.r1RvHzDc92ovRrpcdnPujUk44u4rIlrmRBTTk4YhjrU
+
 ### Generate JWT Token
-POST http://localhost:8080/api/token
-Content-Type: application/json
-
-{
-  "email": "rohim@gmail.com",
-  "password": "password"
-}
-
-### Get All Books (Replace YOUR_JWT_TOKEN with actual token from above)
-GET http://localhost:8080/api/books
-Authorization: Bearer {{token}}
-
-### Get Book by ID
-GET http://localhost:8080/api/books/cc41562f-abf6-11f0-8c0a-768c8b32bc33
-Authorization: Bearer {{token}}
-
-### Get All Books (Using query parameter)
-GET http://localhost:8080/api/books?token={{token}}
-
-### Generate Token for Regular User
 POST http://localhost:8080/api/token
 Content-Type: application/json
 
@@ -27,3 +8,41 @@ Content-Type: application/json
   "email": "alice@example.com",
   "password": "password"
 }
+
+### Get All Books
+GET http://localhost:8080/api/books
+Authorization: Bearer {{token}}
+
+### Get Book by ID
+GET http://localhost:8080/api/books/cc41562f-abf6-11f0-8c0a-768c8b32bc33
+Authorization: Bearer {{token}}
+
+### Create New Book
+POST http://localhost:8080/api/books
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "isbn": "9780132350884",
+  "pages": 464,
+  "available": true
+}
+
+### Update Book
+PUT http://localhost:8080/api/books/cc41562f-abf6-11f0-8c0a-768c8b32bc33
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Clean Code (Updated)",
+  "author": "Robert C. Martin",
+  "isbn": "9780132350884",
+  "pages": 464,
+  "available": false
+}
+
+### Delete Book
+DELETE http://localhost:8080/api/books/cc41562f-abf6-11f0-8c0a-768c8b32bc33
+Authorization: Bearer {{token}}
